@@ -46,7 +46,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <div className="hero"></div>
+      <div className="background"></div>
       <div className="content">
         <Header />
         <main className="flex-grow px-6 py-12">
