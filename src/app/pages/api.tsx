@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { message } = req.body;
 
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
     return res.status(500).json({ error: 'OpenAI API key is not set' });
   }
 
