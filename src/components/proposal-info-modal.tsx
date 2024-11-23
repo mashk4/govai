@@ -40,10 +40,8 @@ export function ProposalInfoModal({ isOpen, onClose, proposal }: ProposalInfoMod
         }
       }
 
-      // Check immediately after render
       checkOverflow()
 
-      // Check again after a short delay to account for any layout shifts
       const timer = setTimeout(checkOverflow, 100)
 
       return () => clearTimeout(timer)
