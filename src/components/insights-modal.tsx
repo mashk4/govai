@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import OpenAI from "openai"
 
 interface InsightsModalProps {
   isOpen: boolean
@@ -18,15 +19,23 @@ interface InsightsModalProps {
 }
 
 interface Message {
-  sender: 'user' | 'agent'
+  role: 'user' | 'assistant'
   content: string
 }
 
+const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true
+});
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export function InsightsModal({ isOpen, onClose, proposalTitle }: InsightsModalProps) {
   const [messages, setMessages] = useState<Message[]>([
-    { sender: 'agent', content: "Hello, what would you like to find out?" }
+    { role: 'assistant', content: "Hey there! What would you like to find out?" }
   ])
   const [inputMessage, setInputMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -38,19 +47,52 @@ export function InsightsModal({ isOpen, onClose, proposalTitle }: InsightsModalP
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim() === '') return
+  const handleSendMessage = async () => {
+    if (inputMessage.trim() === '' || isLoading) return
 
-    const newMessages = [
-      ...messages,
-      { sender: 'user', content: inputMessage } as Message
-    ]
-    setMessages(newMessages)
+    setMessages(prevMessages => [...prevMessages, { role: 'user', content: inputMessage }])
     setInputMessage('')
+    setIsLoading(true)
 
-    setTimeout(() => {
-      setMessages([...newMessages, { sender: 'agent', content: "I'm processing your request. Please wait a moment." }])
-    }, 1000)
+    try {
+      const thread = await openai.beta.threads.create();
+
+      await openai.beta.threads.messages.create(
+        thread.id,
+        {
+          role: "user",
+          content: inputMessage
+        }
+      );
+
+      let run = await openai.beta.threads.runs.createAndPoll(
+        thread.id,
+        {
+          assistant_id: "asst_kyZZu1t3NiYdfGVDvpk6cdYZ",
+        },
+      );
+
+      const newMessages = await openai.beta.threads.messages.list(
+        run.thread_id
+      );
+
+      const assistantMessages = newMessages.data
+        .filter(message => message.role === 'assistant')
+        .map(message => ({
+          role: message.role,
+          content: message.content[0].type === 'text' ? message.content[0].text.value : ''
+        }));
+
+      setMessages(prevMessages => [...prevMessages, ...assistantMessages]);
+    } catch (error) {
+      console.error('Error in API call:', error);
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { role: 'assistant', content: "I'm sorry, I encountered an error while processing your request." }
+      ]);
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -65,8 +107,8 @@ export function InsightsModal({ isOpen, onClose, proposalTitle }: InsightsModalP
             className="flex-grow overflow-y-auto space-y-4 pr-4"
           >
             {messages.map((message, index) => (
-              <div key={index} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] p-3 rounded-lg ${message.sender === 'user' ? 'bg-green-600' : 'bg-zinc-800'}`}>
+              <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[70%] p-3 rounded-lg ${message.role === 'user' ? 'bg-green-600' : 'bg-zinc-800'}`}>
                   <p className="text-sm">{message.content}</p>
                 </div>
               </div>
@@ -82,10 +124,12 @@ export function InsightsModal({ isOpen, onClose, proposalTitle }: InsightsModalP
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               className="flex-grow bg-zinc-800 text-white border-zinc-700"
+              disabled={isLoading}
             />
             <Button
               onClick={handleSendMessage}
               className="bg-green-600 hover:bg-green-700 text-white"
+              disabled={isLoading}
             >
               <Send className="h-4 w-4" />
               <span className="sr-only">Send message</span>
