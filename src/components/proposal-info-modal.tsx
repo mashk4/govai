@@ -15,7 +15,7 @@ interface ProposalInfoModalProps {
   onClose: () => void
   proposal: {
     title: string
-    description: string
+    fullDescription: string
   }
 }
 
@@ -30,7 +30,6 @@ export function ProposalInfoModal({ isOpen, onClose, proposal }: ProposalInfoMod
   useEffect(() => {
     if (isOpen) {
       setIsExpanded(false);
-      setIsExpanded(false)
       setSelectedVote(null)
 
       const checkOverflow = () => {
@@ -65,25 +64,9 @@ export function ProposalInfoModal({ isOpen, onClose, proposal }: ProposalInfoMod
             ref={contentRef}
             className={`space-y-4 ${isExpanded ? '' : 'max-h-[200px] overflow-hidden relative'}`}
           >
-            <p className="text-gray-300">{proposal.description}</p>
-            <p className="text-gray-300">
-              Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.
-            </p>
-            <p className="text-gray-300">
-              Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum...
-            </p>
-            <p className="text-gray-300">
-              Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum...
-            </p>
-            <p className="text-gray-300">
-              Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum...
-            </p>
-            <p className="text-gray-300">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
-            <p className="text-gray-300">
-              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </p>
+            {proposal.fullDescription.split('\n\n').map((paragraph, index) => (
+              <p key={index} className="text-gray-300">{paragraph}</p>
+            ))}
             {!isExpanded && showViewMore && (
               <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-zinc-900 to-transparent" />
             )}

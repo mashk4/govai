@@ -12,8 +12,8 @@ interface ProposalCardProps {
 export function ProposalCard({ number, title, description, onInfoClick, onInsightsClick }: ProposalCardProps) {
   return (
     <div className="proposal-card">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
+      <div className="flex flex-col md:flex-row md:items-center justify-between">
+        <div className="flex-1 mb-4 md:mb-0 md:mr-4">
           <h3 className="proposal-title">
             {number}. {title}
           </h3>
@@ -25,7 +25,7 @@ export function ProposalCard({ number, title, description, onInfoClick, onInsigh
             className="button button-secondary"
             onClick={onInsightsClick}
           >
-            Get insights
+            Get assistance
           </Button>
           <Button
             variant="ghost"
