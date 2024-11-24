@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import OpenAI from "openai"
+import { getResponseFromGpt } from './chat'
 
 interface InsightsModalProps {
   isOpen: boolean
@@ -23,10 +24,11 @@ interface Message {
   content: string
 }
 
-const openai = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+// console.log(process.env?.OPENAI_API_KEY || "Not found wtf");
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY || "",
+//   dangerouslyAllowBrowser: true
+// });
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -55,33 +57,38 @@ export function InsightsModal({ isOpen, onClose, proposalTitle }: InsightsModalP
     setIsLoading(true)
 
     try {
-      const thread = await openai.beta.threads.create();
+      // const thread = await openai.beta.threads.create();
 
-      await openai.beta.threads.messages.create(
-        thread.id,
-        {
-          role: "user",
-          content: inputMessage
-        }
-      );
+      // await openai.beta.threads.messages.create(
+      //   thread.id,
+      //   {
+      //     role: "user",
+      //     content: inputMessage
+      //   }
+      // );
 
-      let run = await openai.beta.threads.runs.createAndPoll(
-        thread.id,
-        {
-          assistant_id: "asst_kyZZu1t3NiYdfGVDvpk6cdYZ",
-        },
-      );
+      // let run = await openai.beta.threads.runs.createAndPoll(
+      //   thread.id,
+      //   {
+      //     assistant_id: "asst_kyZZu1t3NiYdfGVDvpk6cdYZ",
+      //   },
+      // );
 
-      const newMessages = await openai.beta.threads.messages.list(
-        run.thread_id
-      );
+      // const newMessages = await openai.beta.threads.messages.list(
+      //   run.thread_id
+      // );
 
-      const assistantMessages = newMessages.data
-        .filter(message => message.role === 'assistant')
-        .map(message => ({
-          role: message.role,
-          content: message.content[0].type === 'text' ? message.content[0].text.value : ''
-        }));
+      // const assistantMessages = newMessages.data
+      //   .filter(message => message.role === 'assistant')
+      //   .map(message => ({
+      //     role: message.role,
+      //     content: message.content[0].type === 'text' ? message.content[0].text.value : ''
+      //   }));
+
+      // const body = JSON.stringify({ message: inputMessage })
+      // const chatResponse = await fetch("/api/chat", { method: "POST", body })
+      const assistantMessages = await getResponseFromGpt(inputMessage);
+      // const assistantMessages: Message[] = [{ role: 'assistant', content: chatResponse }]
 
       setMessages(prevMessages => [...prevMessages, ...assistantMessages]);
     } catch (error) {
