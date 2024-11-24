@@ -10,11 +10,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-
+import { getResponseFromGPT } from "./chat"
 interface InsightsModalProps {
   isOpen: boolean
   onClose: () => void
   proposalTitle: string
+  proposal: object,
+  proposals: object[],
 }
 
 interface Message {
@@ -22,7 +24,7 @@ interface Message {
   content: string
 }
 
-export function InsightsModal({ isOpen, onClose, proposalTitle }: InsightsModalProps) {
+export function InsightsModal({ isOpen, onClose, proposalTitle, proposal, allProposals }: InsightsModalProps) {
   const [messages, setMessages] = useState<Message[]>([
     { sender: 'agent', content: "Hello, what would you like to find out?" }
   ])
@@ -38,7 +40,7 @@ export function InsightsModal({ isOpen, onClose, proposalTitle }: InsightsModalP
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return
 
     const newMessages = [
@@ -46,10 +48,12 @@ export function InsightsModal({ isOpen, onClose, proposalTitle }: InsightsModalP
       { sender: 'user', content: inputMessage } as Message
     ]
     setMessages(newMessages)
+    const tempInputMessage = inputMessage;
     setInputMessage('')
 
+    const response = await getResponseFromGPT(tempInputMessage) || "";
     setTimeout(() => {
-      setMessages([...newMessages, { sender: 'agent', content: "I'm processing your request. Please wait a moment." }])
+      setMessages([...newMessages, { sender: 'agent', content: response }])
     }, 1000)
   }
 

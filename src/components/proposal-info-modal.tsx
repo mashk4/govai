@@ -86,14 +86,13 @@ export function ProposalInfoModal({ isOpen, onClose, proposal }: ProposalInfoMod
               {(['for', 'against', 'abstain'] as const).map((option) => (
                 <button
                   key={option}
-                  className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-colors ${
-                    selectedVote === option
-                      ? option === 'for'
-                        ? 'bg-green-600 text-white'
-                        : option === 'against'
+                  className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-colors ${selectedVote === option
+                    ? option === 'for'
+                      ? 'bg-green-600 text-white'
+                      : option === 'against'
                         ? 'bg-red-600 text-white'
                         : 'bg-gray-600 text-white'
-                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                    : 'bg-zinc-800 text-white hover:bg-zinc-700'
                     }`}
                   onClick={() => setSelectedVote(option)}
                 >
@@ -102,11 +101,10 @@ export function ProposalInfoModal({ isOpen, onClose, proposal }: ProposalInfoMod
               ))}
             </div>
             <Button
-              className={`w-full transition-colors ${
-                selectedVote
-                  ? 'bg-white text-zinc-900 hover:bg-gray-200'
-                  : 'bg-gray-600 text-gray-300 hover:bg-gray-700'
-              }`}
+              className={`w-full transition-colors ${selectedVote
+                ? 'bg-white text-zinc-900 hover:bg-gray-200'
+                : 'bg-gray-600 text-gray-300 hover:bg-gray-700'
+                }`}
               size="lg"
               onClick={handleVote}
               disabled={!selectedVote}
